@@ -1,0 +1,1129 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_admin",
+                "type": "address"
+            }
+        ],
+        "name": "addAdmin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "amount0Desired",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount1Desired",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount0Min",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount1Min",
+                        "type": "uint256"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "transactionDeadline",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "nonce",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "poolAddress",
+                                "type": "address"
+                            }
+                        ],
+                        "internalType": "struct BaseLiquidityManager.CommonTransactionParams",
+                        "name": "commonTransactionParams",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct BaseLiquidityManager.AddLiquidityParams",
+                "name": "params",
+                "type": "tuple"
+            }
+        ],
+        "name": "addLiquidity",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_pool",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            },
+            {
+                "internalType": "int24",
+                "name": "lastMinTick",
+                "type": "int24"
+            },
+            {
+                "internalType": "int24",
+                "name": "lastMaxTick",
+                "type": "int24"
+            },
+            {
+                "internalType": "uint16",
+                "name": "poolDropOutFee",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "poolOperatorFee",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint256",
+                "name": "dropOutDeadline",
+                "type": "uint256"
+            }
+        ],
+        "name": "addPool",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "collectFeesEarned",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount0",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount1",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "_admins",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address",
+                "name": "_feeRecipent",
+                "type": "address"
+            },
+            {
+                "internalType": "contract INonfungiblePositionManager",
+                "name": "_nonfungiblePositionManager",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_WETH9",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_swapRouter",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "poolNonce",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token0Claimed",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token1Claimed",
+                "type": "uint256"
+            }
+        ],
+        "name": "FeeClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "poolNonce",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "depositor",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token0Amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token1Amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "liquidityAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum BaseLiquidityManager.EventType",
+                "name": "event_type",
+                "type": "uint8"
+            }
+        ],
+        "name": "LiquidityAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "poolNonce",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token0AmountReturned",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token1AmountReturned",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "liquidityRemoved",
+                "type": "uint256"
+            }
+        ],
+        "name": "LiquidityRemoved",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "poolNonce",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "token0Address",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "token1Address",
+                "type": "address"
+            }
+        ],
+        "name": "PoolAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "poolNonce",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int24",
+                "name": "newMinTick",
+                "type": "int24"
+            },
+            {
+                "indexed": false,
+                "internalType": "int24",
+                "name": "newMaxTick",
+                "type": "int24"
+            }
+        ],
+        "name": "PoolRebalanced",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "poolNonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "PoolRemoved",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "int24",
+                        "name": "lowerTick",
+                        "type": "int24"
+                    },
+                    {
+                        "internalType": "int24",
+                        "name": "upperTick",
+                        "type": "int24"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "estimatedGas",
+                        "type": "uint256"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "transactionDeadline",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "nonce",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "poolAddress",
+                                "type": "address"
+                            }
+                        ],
+                        "internalType": "struct BaseLiquidityManager.CommonTransactionParams",
+                        "name": "commonTransactionParams",
+                        "type": "tuple"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "higherPricedToken",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct BaseLiquidityManager.ReblanceParams",
+                "name": "params",
+                "type": "tuple"
+            }
+        ],
+        "name": "rebalancePositions",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_admin",
+                "type": "address"
+            }
+        ],
+        "name": "removeAdmin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_pool",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "removePool",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "tokenIn",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "tokenOut",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountIn",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint24",
+                "name": "feeTier",
+                "type": "uint24"
+            }
+        ],
+        "name": "swapExactInputSingle",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "amountOut",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_feeRecipent",
+                "type": "address"
+            }
+        ],
+        "name": "updateFeeRecipent",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint16",
+                "name": "_feePercent",
+                "type": "uint16"
+            }
+        ],
+        "name": "updatePoolDropOutFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint16",
+                "name": "_feePercent",
+                "type": "uint16"
+            }
+        ],
+        "name": "updatePoolOperatorFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint128",
+                        "name": "liquidity",
+                        "type": "uint128"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "tokenId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount0Min",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount1Min",
+                        "type": "uint256"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "transactionDeadline",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "nonce",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "poolAddress",
+                                "type": "address"
+                            }
+                        ],
+                        "internalType": "struct BaseLiquidityManager.CommonTransactionParams",
+                        "name": "commonTransactionParams",
+                        "type": "tuple"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "collectInWeth",
+                        "type": "bool"
+                    }
+                ],
+                "internalType": "struct BaseLiquidityManager.WithDrawLiquidityParams",
+                "name": "params",
+                "type": "tuple"
+            }
+        ],
+        "name": "withdrawLiquidity",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "withDrawLiquidityForAllInvestors",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "admins",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "feeRecipent",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "feeScalingFactor",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPoolDetails",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount0",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount1",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint16",
+                        "name": "poolDropOutFee",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "uint16",
+                        "name": "poolOperatorFee",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "uint24",
+                        "name": "feeTier",
+                        "type": "uint24"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "dropOutDeadline",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "int24",
+                        "name": "lastMinTick",
+                        "type": "int24"
+                    },
+                    {
+                        "internalType": "int24",
+                        "name": "lastMaxTick",
+                        "type": "int24"
+                    },
+                    {
+                        "internalType": "contract IERC20",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "contract IERC20",
+                        "name": "token1",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct BaseLiquidityManager.PoolDetails",
+                "name": "poolDetails",
+                "type": "tuple"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint128",
+                        "name": "initialLiquidity",
+                        "type": "uint128"
+                    },
+                    {
+                        "internalType": "uint128",
+                        "name": "currentLiquidity",
+                        "type": "uint128"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "token0AmountInPoolInitial",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "token1AmountInPoolInitial",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct BaseLiquidityManager.PoolLiquidity",
+                "name": "_poolLiquidity",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "poolAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "walletAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+            }
+        ],
+        "name": "getUserLiquidityForPool",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount0",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount1",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint128",
+                        "name": "tokensOwed0",
+                        "type": "uint128"
+                    },
+                    {
+                        "internalType": "uint128",
+                        "name": "tokensOwed1",
+                        "type": "uint128"
+                    },
+                    {
+                        "internalType": "uint128",
+                        "name": "liquidity",
+                        "type": "uint128"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "nftId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "int24",
+                        "name": "currentPoolTick",
+                        "type": "int24"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct BaseLiquidityManager.UserPosition",
+                "name": "userPosition",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "nonfungiblePositionManager",
+        "outputs": [
+            {
+                "internalType": "contract INonfungiblePositionManager",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+            }
+        ],
+        "name": "onERC721Received",
+        "outputs": [
+            {
+                "internalType": "bytes4",
+                "name": "",
+                "type": "bytes4"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "poolInvestors",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "poolLiquidity",
+        "outputs": [
+            {
+                "internalType": "uint128",
+                "name": "initialLiquidity",
+                "type": "uint128"
+            },
+            {
+                "internalType": "uint128",
+                "name": "currentLiquidity",
+                "type": "uint128"
+            },
+            {
+                "internalType": "uint256",
+                "name": "token0AmountInPoolInitial",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "token1AmountInPoolInitial",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "poolList",
+        "outputs": [
+            {
+                "internalType": "uint16",
+                "name": "poolDropOutFee",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "poolOperatorFee",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint24",
+                "name": "feeTier",
+                "type": "uint24"
+            },
+            {
+                "internalType": "uint256",
+                "name": "dropOutDeadline",
+                "type": "uint256"
+            },
+            {
+                "internalType": "int24",
+                "name": "lastMinTick",
+                "type": "int24"
+            },
+            {
+                "internalType": "int24",
+                "name": "lastMaxTick",
+                "type": "int24"
+            },
+            {
+                "internalType": "contract IERC20",
+                "name": "token0",
+                "type": "address"
+            },
+            {
+                "internalType": "contract IERC20",
+                "name": "token1",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "shares",
+        "outputs": [
+            {
+                "internalType": "uint128",
+                "name": "liquidity",
+                "type": "uint128"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nftId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "token0",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "token1",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "swapRouter",
+        "outputs": [
+            {
+                "internalType": "contract ISwapRouter",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "weth9",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
