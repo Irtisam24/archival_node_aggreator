@@ -46,7 +46,8 @@ export interface IPoolInstance {
   token0address: string,
   token1address: string,
   pooltype: TPoolType,
-  blockchain: TBlockChain
+  blockchain: TBlockChain,
+  createdat: string
 }
 
 export interface IUniswapTokenHourlyData {
@@ -58,6 +59,7 @@ export interface IUniswapTokenHourlyData {
     decimals: number
   },
   totalValueLocked: number
+  totalValueLockedUSD: number
 }
 
 

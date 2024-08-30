@@ -1,11 +1,11 @@
 import { parentPort } from 'node:worker_threads';
-import { getTokenDetails, sleep } from '../utils';
+import { getTokenDayData, getTokenDetails, sleep } from '../utils';
 import { IHourlyUpdationWorkerArgs, ILiquidityEvent, IPoolInstance, IPoolLiquidityInfo, IUniswapTokenHourlyData, TWorkerArgs } from '../types';
 import { getClient } from '../config';
 import BigNumber from 'bignumber.js';
 import { PoolClient } from 'pg';
 import { isHourlyUpdationWorkerArgs } from '../utils/type_guards';
-import { Contract, ethers } from 'ethers';
+import { Contract } from 'ethers';
 import groupAbi from "../abi/group_contract.json";
 import individualAbi from "../abi/indv_contract.json";
 import { RpcTrackerProvider } from '../utils/provider';
@@ -14,7 +14,6 @@ import { RpcTrackerProvider } from '../utils/provider';
 parentPort?.on('message', async (task: string) => {
     const parsedEvent: TWorkerArgs = JSON.parse(task);
     if (isHourlyUpdationWorkerArgs(parsedEvent)) {
-        console.log("is hourly task");
         startHourlyWorker(parsedEvent);
         return;
     }
@@ -153,11 +152,8 @@ const handleLiquidityManageEvent = async (event: ILiquidityEvent) => {
         const poolData_ = poolData.rows[0];
         const token0Details = await getTokenDetails<IUniswapTokenHourlyData>(poolData_.token0address.toLowerCase());
         const token1Details = await getTokenDetails<IUniswapTokenHourlyData>(poolData_.token1address.toLowerCase());
-
-        const token0AmountUsd = mappedArgs.token0Amount.dividedBy(10 ** token0Details.token.decimals)
-            .multipliedBy(new BigNumber(String(token0Details.priceUSD))).toString();
-        const token1AmountUsd = mappedArgs.token1Amount.dividedBy(10 ** token1Details.token.decimals)
-            .multipliedBy(new BigNumber(String(token0Details.priceUSD))).toString();
+        const token0AmountUsd = getTokenTotalPriceUsd(mappedArgs.token0Amount, token0Details.token.decimals, token0Details.priceUSD)
+        const token1AmountUsd = getTokenTotalPriceUsd(mappedArgs.token1Amount, token1Details.token.decimals, token1Details.priceUSD)
         const liquidityAddedInUsd = new BigNumber(token0AmountUsd).plus(new BigNumber(token1AmountUsd)).toString();
 
         const insertQuery = `INSERT INTO transaction_logs (
@@ -292,50 +288,39 @@ const startHourlyWorker = async (args: IHourlyUpdationWorkerArgs) => {
     while (true) {
         try {
             const allPoolsToMonitor = await getAllPoolsToMonitor();
+            const currentTimeStamp = Math.floor(new Date().getTime() / 1000)
             if (allPoolsToMonitor && allPoolsToMonitor.length !== 0) {
                 for (const pool of allPoolsToMonitor) {
-                    let poolTotalCurrentLiquidity: IPoolLiquidityInfo;
-                    if (pool.pooltype == "group") {
-                        // if group pool get from group contract
-                        poolTotalCurrentLiquidity = await getPoolDetailsFromChain(
-                            groupContracts.get(pool.blockchain),
-                            pool.pooladdress,
-                            pool.poolnonce
-                        )
-                    } else {
-                        //get from individual contract
-                        poolTotalCurrentLiquidity = await getPoolDetailsFromChain(
-                            individualContracts.get(pool.blockchain),
-                            pool.pooladdress,
-                            pool.poolnonce
-                        )
-                    }
-                    console.log("poolTotalCurrentLiquidity", poolTotalCurrentLiquidity);
+                    const poolTotalCurrentLiquidity: IPoolLiquidityInfo = await getPoolDetailsFromChain(
+                        pool.pooltype == "group" ? groupContracts.get(pool.blockchain) : individualContracts.get(pool.blockchain),
+                        pool.pooladdress,
+                        pool.poolnonce
+                    );
+                    const poolStartDate: number = Math.floor(new Date(pool.createdat).getTime() / 1000)
+                        ;
+                    console.log("poolStartDate", poolStartDate);
 
-                    let token0Details: IUniswapTokenHourlyData
-                    let token1Details: IUniswapTokenHourlyData
                     const memoKeyToken0 = `${pool.blockchain}_${pool.token0address}`
+                    const memoKeyToken0Start = `${memoKeyToken0}_at_start`;
                     const memoKeyToken1 = `${pool.blockchain}_${pool.token1address}`
-                    if (memo.get(memoKeyToken0)) {
-                        token0Details = memo.get(memoKeyToken0);
-                    } else {
-                        const tokenDetails = await getTokenDetails<IUniswapTokenHourlyData>(pool.token0address.toLowerCase());
-                        memo.set(memoKeyToken0, tokenDetails);
-                        token0Details = tokenDetails;
-                    }
-                    if (memo.get(memoKeyToken1)) {
-                        token1Details = memo.get(memoKeyToken1);
-                    } else {
-                        const tokenDetails = await getTokenDetails<IUniswapTokenHourlyData>(pool.token1address.toLowerCase());
-                        memo.set(memoKeyToken1, tokenDetails);
-                        token1Details = tokenDetails;
-                    }
-                    const token0AmountUsd = new BigNumber(poolTotalCurrentLiquidity.token0Amount).dividedBy(10 ** token0Details.token.decimals)
-                        .multipliedBy(new BigNumber(String(token0Details.priceUSD))).toString();
-                    const token1AmountUsd = new BigNumber(poolTotalCurrentLiquidity.token0Amount).dividedBy(10 ** token1Details.token.decimals)
-                        .multipliedBy(new BigNumber(String(token0Details.priceUSD))).toString();
+                    const memoKeyToken1Start = `${memoKeyToken1}_at_start`;
+                    const memoToken0DayData = `${memoKeyToken0}_daily_mdd`;
+                    const memoToken1DayData = `${memoKeyToken1}_daily_mdd`;
 
+                    const token0Details: IUniswapTokenHourlyData = await tryGetTokenDetails(memo, pool.token0address, memoKeyToken0);
+                    const token0DetailsAtStart: IUniswapTokenHourlyData = await tryGetTokenDetails(memo, pool.token0address, memoKeyToken0Start);
+
+                    const token1Details: IUniswapTokenHourlyData = await tryGetTokenDetails(memo, pool.token1address, memoKeyToken1);
+                    const token1DetailsAtStart: IUniswapTokenHourlyData = await tryGetTokenDetails(memo, pool.token1address, memoKeyToken1Start);
+
+                    const token0AmountUsd = getTokenTotalPriceUsd(poolTotalCurrentLiquidity.token0Amount, token0Details.token.decimals, token0Details.priceUSD);
+                    const token1AmountUsd = getTokenTotalPriceUsd(poolTotalCurrentLiquidity.token0Amount, token1Details.token.decimals, token0Details.priceUSD)
                     const liquidityAddedInUsd = new BigNumber(token0AmountUsd).plus(new BigNumber(token1AmountUsd)).toString();
+                    const roiAtTime = await calculateRoiAtTime(token0Details, token1Details, token0DetailsAtStart, token1DetailsAtStart);
+                    const token0DayData: IUniswapTokenHourlyData[] = await tryGetTokenDayData(memo, pool.token0address, memoToken0DayData, currentTimeStamp);
+                    const token1DayData: IUniswapTokenHourlyData[] = await tryGetTokenDayData(memo, pool.token1address, memoToken1DayData, currentTimeStamp);
+                    const mddAtTime = await calculateMDDAtTime(token0DayData, token1DayData);
+                    // 
                 }
             }
         } catch (error) {
@@ -374,5 +359,80 @@ const getAllPoolsToMonitor = async () => {
     }
 }
 
-const calculateRoiAtTime = async () => { }
-const calculateMDDAtTime = async () => { }
+const tryGetTokenDetails = async (memo: Map<string, IUniswapTokenHourlyData>, tokenAddress: string, memoKey: string, timeStamp?: number): Promise<IUniswapTokenHourlyData> => {
+    // Check if the value is already in the memo map
+    const cachedDetails = memo.get(memoKey);
+    if (cachedDetails) {
+        return cachedDetails;
+    } else {
+        const tokenDetails = await getTokenDetails<IUniswapTokenHourlyData>(tokenAddress.toLowerCase(), timeStamp);
+        memo.set(memoKey, tokenDetails);
+        return tokenDetails;
+    }
+}
+
+const tryGetTokenDayData = async (memo: Map<string, IUniswapTokenHourlyData | IUniswapTokenHourlyData[]>, tokenAddress: string, memoKey: string, timeStamp: number): Promise<IUniswapTokenHourlyData[]> => {
+    // Check if the value is already in the memo map
+    const cachedDetails = memo.get(memoKey);
+    if (cachedDetails) {
+        return cachedDetails as IUniswapTokenHourlyData[];
+    } else {
+        const tokenDetails = await getTokenDayData<IUniswapTokenHourlyData[]>(tokenAddress.toLowerCase(), timeStamp);
+        memo.set(memoKey, tokenDetails);
+        return tokenDetails;
+    }
+}
+
+const getTokenTotalPriceUsd = (tokenAmount: BigNumber.Value, tokenDecimals: number, priceUSD: number): string => {
+    return new BigNumber(tokenAmount).dividedBy(10 ** tokenDecimals)
+        .multipliedBy(new BigNumber(String(priceUSD))).toString();
+}
+
+const getNav = (totalValueLockedToken0USD: number, totalValueLockedToken1USD: number) => {
+    try {
+        const result = new BigNumber(String(totalValueLockedToken0USD))
+            .plus(new BigNumber(String(totalValueLockedToken1USD))).toString();
+        return result;
+    } catch (error) {
+        console.error('Error in initial calculateNav:', error);
+        throw error;
+    }
+}
+
+const calculateRoiAtTime = async (token0Details: IUniswapTokenHourlyData,
+    token1Details: IUniswapTokenHourlyData,
+    token0DetailsStart: IUniswapTokenHourlyData,
+    token1DetailsStart: IUniswapTokenHourlyData
+) => {
+    const currentNav = new BigNumber(getNav(token0Details.totalValueLockedUSD, token1Details.totalValueLockedUSD));
+    const navAtStart = new BigNumber(getNav(token0DetailsStart.totalValueLockedUSD, token1DetailsStart.totalValueLockedUSD));
+    return currentNav.minus(navAtStart).div(navAtStart);
+
+}
+const calculateMDDAtTime = async (token0DayData: IUniswapTokenHourlyData[], token1DayData: IUniswapTokenHourlyData[]) => {
+    // Calculate NAV data for each timestamp
+    const navData = token0DayData.map((data, index) => {
+        const navAtTime = getNav(data.totalValueLockedUSD, token1DayData[index].totalValueLockedUSD);
+        return { timestamp: data.periodStartUnix, nav: new BigNumber(navAtTime) };
+    });
+    // Sort navData by timestamp
+    navData.sort((a, b) => a.timestamp - b.timestamp);
+    // Find peak NAV
+    const peak = navData.reduce((maxObj, curr) => (curr.nav.gt(maxObj.nav) ? curr : maxObj), {
+        nav: new BigNumber(-Infinity),
+        timestamp: 0
+    });
+
+    // Find valley NAV after the peak
+    const valley = navData
+        .slice(navData.findIndex((data) => data.timestamp === peak.timestamp) + 1)
+        .reduce((minObj, curr) => (curr.nav.lt(minObj.nav) ? curr : minObj), { nav: new BigNumber(Infinity) });
+
+    // Calculate MDD
+    if (peak.nav.lte(valley.nav)) {
+        return "0";
+    } else {
+        return valley.nav.minus(peak.nav).dividedBy(peak.nav).toString();
+    }
+
+}

@@ -1,7 +1,7 @@
 import { PoolClient } from 'pg';
 import { UNISWAP_V3_GRAPH_URL, getClient } from '../config';
 import axios from 'axios';
-import { getTokenHourlyDetailsQuery } from './uniswap_queries';
+import { getTokenDayDataPerHour, getTokenHourlyDetailsQuery, getTokenHourlyDetailsQueryAtTimeStamp } from './uniswap_queries';
 
 export const bootstrap = async () => {
     const client = await getClient();
@@ -60,6 +60,7 @@ const createTables = async (client: PoolClient) => {
             token1Address TEXT NOT NULL,
             poolType pool_type_enum NOT NULL,
             blockChain block_chain_type_enum NOT NULL,
+            createdAt TIMESTAMP DEFAULT NOW(),
             UNIQUE (poolAddress,poolNonce,poolType,blockChain)
         );
 
@@ -103,9 +104,16 @@ const createIndexes = async (client: PoolClient) => {
     ON pools_to_monitor (pooladdress, poolnonce, pooltype, blockchain);`)
 }
 
-export async function getTokenDetails<T>(tokenAddress: string): Promise<T> {
+export async function getTokenDetails<T>(tokenAddress: string, timeStamp?: number): Promise<T> {
     const resp = await axios.post(UNISWAP_V3_GRAPH_URL, {
-        query: getTokenHourlyDetailsQuery(tokenAddress),
+        query: timeStamp ? getTokenHourlyDetailsQueryAtTimeStamp(tokenAddress, timeStamp) : getTokenHourlyDetailsQuery(tokenAddress),
     });
     return resp.data?.data?.tokenHourDatas[0];
+}
+
+export async function getTokenDayData<T>(tokenAddress: string, timeStamp: number): Promise<T> {
+    const resp = await axios.post(UNISWAP_V3_GRAPH_URL, {
+        query: getTokenDayDataPerHour(tokenAddress, timeStamp),
+    });
+    return resp.data?.data?.tokenHourDatas;
 }

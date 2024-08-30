@@ -25,10 +25,13 @@ bootstrap()
     console.log('connection made');
     try {
       // fire up worker distributor
-      new Worker(__dirname + "/src/workers/worker_distributor.ts", {
+      const workerPoolHandler = new Worker(__dirname + "/src/workers/worker_distributor.ts", {
         env: SHARE_ENV,
         execArgv: ["--require", "ts-node/register"]
       })
+      workerPoolHandler.on('exit', (code) => {
+        console.log(`Manager worker exited with code ${code}`);
+      });
     } catch (error) {
       console.log("error while setting up workers", error);
     }
@@ -37,3 +40,4 @@ bootstrap()
   .catch(error => {
     console.log('Failed to connect to database', error);
   });
+  
